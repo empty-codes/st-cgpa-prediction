@@ -4,12 +4,13 @@ import joblib
 
 #This is to  Load the trained model
 
-#model = joblib.load('dt_trained_model.pkl')
 
 model = joblib.load('decision_tree_model.pkl')
 
 # Function to convert input values to numeric
-def convert_to_numeric(d_cgpa, sleep, study, program, hall, work):
+def convert_to_numeric(d_cgpa, sleep, study, program, hall, work, A_grade,seven_class, health, substance_use, ):
+
+
     # Convert d_cgpa, sleep, and study to float
     d_cgpa_numeric = float(d_cgpa)
 
@@ -93,13 +94,50 @@ def convert_to_numeric(d_cgpa, sleep, study, program, hall, work):
     }
     work_numeric = work_mapping[work]
 
-    return d_cgpa_numeric, sleep_numeric, study_numeric, program_numeric, hall_numeric, work_numeric
+    a_mapping = {
+       'Strongly Agree':0,
+       'Agree':1,
+       'Neither Agree or Disagree':2,
+       'Disagree':3,
+       'Strongly Disagree':4,
+    }
+    a_numeric = a_mapping[A_grade]
+
+    seven_mapping = {
+       'Strongly Agree':0,
+       'Agree':1,
+       'Neutral':2,
+       'Disagree':3,
+       'Strongly Disagree':4,
+    }
+    seven_numeric = seven_mapping[seven_class]
+
+
+    health_mapping = {
+       'Yes': 0, 'No': 1
+    }
+    health_numeric = health_mapping[health]
+
+    substance_mapping = {
+
+        'Strongly Agree': 0,
+        'Agree': 1,
+        'Neither Agree or Disagree': 2,
+        'Disagree': 3,
+        'Strongly Disagree': 4
+
+    }
+    substance_numeric = substance_mapping[substance_use]
+
+
+
+    return d_cgpa_numeric, sleep_numeric, study_numeric, program_numeric, hall_numeric, work_numeric, a_numeric, seven_numeric, health_numeric,  substance_numeric
 
 
 # Function to make predictions
-def predict_cgpa(d_cgpa, sleep, study, program, hall, work):
+def predict_cgpa(d_cgpa, sleep, study, program, hall, work, A_grade, seven_class, health, substance_use):
     # Convert inputs to numeric
-    d_cgpa, sleep, study, program, hall, work = convert_to_numeric(d_cgpa, sleep, study, program, hall, work)
+    d_cgpa, sleep, study, program, hall, work, A_grade, seven_class, health, substance_use = convert_to_numeric(d_cgpa, sleep, study, program, hall, work, A_grade, seven_class,  health, substance_use)
 
     # Create a DataFrame with the input data, ensuring the correct order of features
     user_data = pd.DataFrame({
@@ -108,7 +146,11 @@ def predict_cgpa(d_cgpa, sleep, study, program, hall, work):
         'study': [study],
         'program': [program],
         'hall': [hall],
-        'work': [work]
+        'work': [work],
+        'A_grade' :[A_grade],
+        'seven_class':[seven_class],
+        'health':[health],
+        'substance_use':[substance_use]
     })[model.feature_names_in_]  # Use the feature names from the trained model
 
     # Make prediction
@@ -122,6 +164,7 @@ def main():
 
     # User inputs for the new features
     d_cgpa = st.number_input('Desired CGPA', min_value=0.0, max_value=5.0, step=0.01)
+
     sleep = st.selectbox('On average, how many hours do you sleep per day?', ['Less than 6 hours', '6 - 8 hours', 'More than 8 hours'])
     study = st.selectbox('On average, how many hours do you study per day, excluding attending classes?', ['Less than 2 hours', '2 - 4 hours', 'More than 4 hours', 'I do not study'])
     program = st.selectbox('Undergraduate Program', [
@@ -135,19 +178,18 @@ def main():
         'NUTRITION AND DIETETICS', 'PHYSICS', 'NURSING SCIENCE', 'PHYSIOLOGY', 'POLITICAL SCIENCE', 'PUBLIC ADMINISTRATION',
         'PUBLIC HEALTH', 'SOCIAL WORK AND HUMAN SERVICES', 'SOFTWARE ENGINEERING', 'OTHER'
     ])
+    substance_use= st.selectbox('I believe that the use of substances, including addictive or hard drugs, for non-medical purposes can have a negative impact on academic performance.', ['Strongly Agree', 'Agree', 'Neither Agree or Disagree', 'Disagree', 'Strongly Disagree'])
+
     hall = st.radio('Are you residing in a classic, premium, or regular hall?', ['Classic', 'Premium', 'Regular', 'Off-campus'], horizontal=True)
     work = st.radio('Do you have a part-time job or participate in the work-study program?', ['Yes', 'No'], horizontal=True)
+    A_grade = st.radio('A being 80 positively impacts your academic performance', ['Strongly Agree', 'Agree', 'Neither Agree or Disagree', 'Disagree', 'Strongly Disagree'], horizontal=True)
+    seven_class = st.radio('Seven am classes positively impacts your academic performance', ['Strongly Agree', 'Agree', 'Neither Agree or Disagree', 'Disagree', 'Strongly Disagree'], horizontal=True)
+    health = st.radio('Do you have any health-related issues or disabilities that affect your academic performance?',  ['Yes', 'No'], horizontal=True)
 
-    # Make prediction when user clicks the 'Predict' button
     if st.button('Predict'):
-        prediction = predict_cgpa(d_cgpa, sleep, study, program, hall, work)
+        prediction = predict_cgpa(d_cgpa, sleep, study, program, hall, work, A_grade, seven_class, health, substance_use, )
         st.success(f'Predicted CGPA: {prediction:.2f}')
 
 # Run the Streamlit app
 if __name__ == '__main__':
     main()
-
-
-    # to run , open command prompt, naviagte to the directory of this file
-    #type in this command  "jupyter nbconvert --to script project0.3.ipynb"
-    #type in this command "streamlit run project0.3.py"
