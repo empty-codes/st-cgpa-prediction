@@ -106,7 +106,7 @@ def convert_to_numeric(d_cgpa, sleep, study, program, hall, work, A_grade,seven_
     seven_mapping = {
        'Strongly Agree':0,
        'Agree':1,
-       'Neutral':2,
+       'Neither Agree or Disagree':2,
        'Disagree':3,
        'Strongly Disagree':4,
     }
